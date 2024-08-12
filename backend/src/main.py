@@ -19,6 +19,7 @@ def shutdown_db_client():
     app.mongodb_client.close()
     print("Connection to the MongoDB closed!")
 
+## root 
 @app.get("/")
 async def root():
     return {"message": "Welcome!"}
