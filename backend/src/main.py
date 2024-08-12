@@ -13,6 +13,11 @@ def startup_db_client():
     app.database = app.mongodb_client[config["DB_NAME"]]
     print("Connected to the MongoDB!")
 
+@app.on_event("shutdown")
+def shutdown_db_client():
+    app.mongodb_client.close()
+    print("Connection to the MongoDB closed!")
+
 @app.get("/")
 async def root():
     return {"message": "Welcome!"}
