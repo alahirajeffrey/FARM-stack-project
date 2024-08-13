@@ -1,4 +1,4 @@
-from fastapi import APIRouter, status, Depends, HTTPException, Body
+from fastapi import APIRouter, status, HTTPException, Body, Response
 from database import menu_collection
 from models import MenuModel, MenuList
 from bson import ObjectId
@@ -25,7 +25,7 @@ async def add_menu_item(menu: MenuModel = Body(...)):
     created_menu = await menu_collection.find_one(
          {"_id": new_menu.inserted_id}
     )
-    return created_menu
+    return Response(status_code=status.HTTP_201_CREATED, content=created_menu)
 
 
 @router.get(
@@ -41,7 +41,7 @@ async def get_single_menu_item(id: str):
     """
     menu_exists = await menu_collection.find_one({"_id": ObjectId(id)})
     if menu_exists is not None:
-        return menu_exists
+        return Response(content=menu_exists, status_code=status.HTTP_200_OK)
     else:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="menu does not exist")
 
@@ -59,8 +59,17 @@ async def get_all_menu_items():
 
     The response is unpaginated and limited to 100 results.
     """
-    return MenuList(menus= await menu_collection.find().to_list(100))
+    menu_list= MenuList(menus= await menu_collection.find().to_list(100))
+    return Response(content=menu_list, status_code=status.HTTP_200_OK)
 
 
-async def delete_menu_item():
-    pass
+@router.delete("/menu/{id}", response_description="Delete a menu")
+async def delete_menu_item(id: str):
+    """
+    Delete a single menu from the database.
+    """
+    delete_result = await menu_collection.delete_one({"_id": ObjectId(id)})
+    if delete_result.deleted_count == 1:
+        return Response(status_code=status.HTTP_200_OK, content="menu deleted")
+    
+    raise HTTPException(status_code=404, detail="menu not found")
