@@ -1,9 +1,14 @@
 from fastapi import FastAPI
-from router import router as menu_router
+from router import router
 
 app = FastAPI(
     title="FARM Stack Menu API", 
     summary="Backend for fullstack menu application using FastApi, React and Mongodb"
     )
 
-app.include_router(router=menu_router, prefix="/api/v1", tags=["menu"])
+app.include_router(router=router, prefix="/api/v1/menu", tags=["menu"])
+
+
+@app.get("/")
+async def root():
+    return {"message": "Backend server running"} 
