@@ -1,6 +1,8 @@
-import os
 import motor.motor_asyncio
+from dotenv import dotenv_values
 
-client = motor.motor_asyncio.AsyncIOMotorClient(os.environ["MONGODB_URI"])
+config = dotenv_values(".env")
+
+client = motor.motor_asyncio.AsyncIOMotorClient(config["MONGO_URI"])
 db = client.test
 menu_collection = db.get_collection("menu")
