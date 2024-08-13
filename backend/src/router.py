@@ -1,19 +1,32 @@
-from fastapi import APIRouter, status, Depends, HTTPException
+from fastapi import APIRouter, status, Depends, HTTPException, Body
 from database import menu_collection
 from models import MenuModel, MenuList
 from bson import ObjectId
 
 router = APIRouter()
 
-# @router.post(
-#     "/menu/",
-#     response_description="Add new menu",
-#     response_model=MenuModel,
-#     status_code=status.HTTP_201_CREATED,
-#     response_model_by_alias=False,
-# )
-async def add_menu_item():
-    pass
+@router.post(
+    "/menu/",
+    response_description="Add new menu",
+    response_model=MenuModel,
+    status_code=status.HTTP_201_CREATED,
+    response_model_by_alias=False,
+)
+async def add_menu_item(menu: MenuModel = Body(...)):
+    """
+    Insert a new menu into the databas.
+
+    A unique `id` will be created and provided in the response.
+    """
+    new_menu = await menu_collection.insert_one(
+        menu.model_dump(by_alias=True, exclude=["id"])
+    )
+
+    created_menu = await menu_collection.find_one(
+         {"_id": new_menu.inserted_id}
+    )
+    return created_menu
+
 
 @router.get(
     "/menu/{id}",
