@@ -5,8 +5,24 @@ from bson import ObjectId
 
 router = APIRouter()
 
+@router.get(
+    "/",
+    response_description="List all menus",
+    response_model=MenuModel,
+    status_code=status.HTTP_200_OK,
+    response_model_by_alias=False,
+)
+async def get_all_menu_items():
+    """
+    List all of the menus in the database.
+
+    The response is unpaginated and limited to 100 results.
+    """
+    menu_list= MenuList(menus= await menu_collection.find().to_list(100))
+    return Response(content=menu_list, status_code=status.HTTP_200_OK)
+
 @router.post(
-    "/menu/",
+    "/",
     response_description="Add new menu",
     response_model=MenuModel,
     status_code=status.HTTP_201_CREATED,
@@ -29,7 +45,7 @@ async def add_menu_item(menu: MenuModel = Body(...)):
 
 
 @router.get(
-    "/menu/{id}",
+    "/{id}",
     response_description="Get menu by id",
     response_model=MenuModel,
     status_code=status.HTTP_200_OK,
@@ -46,24 +62,7 @@ async def get_single_menu_item(id: str):
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="menu does not exist")
 
 
-@router.get(
-    "/menus/",
-    response_description="List all menus",
-    response_model=MenuModel,
-    status_code=status.HTTP_200_OK,
-    response_model_by_alias=False,
-)
-async def get_all_menu_items():
-    """
-    List all of the menus in the database.
-
-    The response is unpaginated and limited to 100 results.
-    """
-    menu_list= MenuList(menus= await menu_collection.find().to_list(100))
-    return Response(content=menu_list, status_code=status.HTTP_200_OK)
-
-
-@router.delete("/menu/{id}", response_description="Delete a menu")
+@router.delete("/{id}", response_description="Delete a menu")
 async def delete_menu_item(id: str):
     """
     Delete a single menu from the database.
