@@ -11,8 +11,8 @@ PyObjectId = Annotated[str, BeforeValidator(str)]
 class MenuModel(BaseModel):
     id: Optional[PyObjectId] = Field(alias="_id", default=None)
     title: str
-    description: EmailStr
-    price: float = Field(..., le=4.0)
+    description: str
+    price: float 
 
     model_config = ConfigDict(
         populate_by_name=True,
