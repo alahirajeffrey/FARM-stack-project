@@ -2,8 +2,16 @@ from fastapi import APIRouter, status, HTTPException, Body, Response
 from database import menu_collection
 from models import MenuModel, MenuList
 from bson import ObjectId
+from fastapi.responses import JSONResponse
+from typing import Any, Dict
 
 router = APIRouter()
+
+# Custom function to serialize MongoDB documents
+def serialize_document(doc: Dict[str, Any]) -> Dict[str, Any]:
+    if '_id' in doc:
+        doc['_id'] = str(doc['_id'])  # Convert ObjectId to string
+    return doc
 
 @router.get(
     "/",
@@ -41,7 +49,10 @@ async def add_menu_item(menu: MenuModel = Body(...)):
     created_menu = await menu_collection.find_one(
          {"_id": new_menu.inserted_id}
     )
-    return Response(status_code=status.HTTP_201_CREATED, content=created_menu)
+
+    parsed_response = serialize_document(created_menu)
+
+    return JSONResponse(status_code=status.HTTP_201_CREATED, content=parsed_response)
 
 
 @router.get(
